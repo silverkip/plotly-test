@@ -22,10 +22,10 @@ let chart = [{
   mode: 'markers',
   type: 'scatter',
   marker: {color: color, size:12},
-  selected: {
-    marker: {color:'blue', size: 12, line: {width: 2, color:'grey'}}
-  },
-  hoverinfo: 'none'
+  // selected: {
+  //   marker: {color:'blue', size: 12, line: {width: 2, color:'grey'}}
+  // },
+  hoverinfo: 'none',
 }];
 data.forEach(function(val) {
   chart[0].x.push(val["Polarity"]);
@@ -42,25 +42,27 @@ function App() {
 
   function handleMouseClick(e) {
     console.log(e);
-    
-    // console.log(ind);
-    // console.log(data[ind]);
-    // console.log(currentData[0].marker.color[ind]);
-    // currentData[0].marker.color[ind] = 'green';
-    // setData(currentData);
-    // const allPoints = Array.from(document.querySelectorAll(".point"));
-    // console.log(allPoints);
-
+  
     let ind = e.points[0].pointIndex;
     const element = document.getElementById(ind);
     // console.log(element);
     element.scrollIntoView({behavior: 'smooth'});
     setActiveIndex(ind);
+
+    console.log(ind);
+    console.log(data[ind]);
+    console.log(currentData[0].marker.color[ind]);
+    currentData[0].marker.color[ind] = 'green';
+    console.log(currentData[0].marker.color)
+    setData(currentData);
+    setRevision(revision+1);
+    console.log(revision);
+    // const allPoints = Array.from(document.querySelectorAll(".point"));
+    // console.log(allPoints);
     // console.log(data[ind])
   }
 
   function listClick(e) {
-    // console.log('poggers');
     console.log(e);
     setActiveIndex(e);
     console.log(ref.current);
@@ -85,7 +87,9 @@ function App() {
             hovermode: 'closest',
             xaxis: {range: [-1.1, 1.1], fixedrange: false},
             yaxis: {range: [-0.1, 1.1], fixedrange:false},
-            clickmode: 'select+event',
+            clickmode: 'event',
+            uirevision: true,
+            datarevision: {revision}
           }}
           config={{
             displayModeBar: false,
@@ -94,7 +98,6 @@ function App() {
             responsive: true,
           }}
           onClick={handleMouseClick}
-          revision={revision}
         />
       </div>
 
@@ -114,7 +117,7 @@ function App() {
                 name: data[activeIndex].DisplayName,
                 username: data[activeIndex].User,
                 image: data[activeIndex].ProfileURL,
-                isVerified: data[activeIndex]['User Info'].protected, // try replacing this with "isProtected"
+                isVerified: data[activeIndex]['User Info'].protected,
               }}
               tweet={data[activeIndex].Tweet}
               time={new Date(data[activeIndex]['Date Created'])}
@@ -140,7 +143,7 @@ function App() {
                         name: post.DisplayName,
                         username: post.User,
                         image: post.ProfileURL,
-                        isVerified: post['User Info'].protected, // try replacing this with "isProtected"
+                        isVerified: post['User Info'].protected,
                       }}
                       tweet={post.Tweet}
                       time={new Date(post['Date Created'])}
