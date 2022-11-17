@@ -135,6 +135,7 @@ function App() {
               range: [-1.1, 1.1], 
               fixedrange: false,
               autotick: false,
+              showgrid: false,
             },
             yaxis: {
               title: yAxis,
@@ -143,6 +144,7 @@ function App() {
               tick0: 0.5,
               autotick: false,
               zeroline: false,
+              showgrid: false,
             },
             shapes: [
               {
