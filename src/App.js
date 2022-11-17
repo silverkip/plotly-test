@@ -14,16 +14,23 @@ import 'simplebar-react/dist/simplebar.min.css';
 // ];
 
 const data = require('./data/sample_record.json');
-let color = new Array(data.length).fill('red');
+// const PRIMARY_COLOR = "";
+// const SECONDARY_COLOR = "8899a6";
+// const ACCENT_COLOR = "2AA3EF";
+
+let color = new Array(data.length).fill('2AA3EF');
+let xAxis = "Polarity"
+let yAxis = "Subjectivity"
 
 let chart = [{
   x: [],
   y: [],
   mode: 'markers',
   type: 'scatter',
-  marker: {color: color, size:12},
+  marker: {color: color, size:12,},
+  // selectedpoints: [1],
   // selected: {
-  //   marker: {color:'blue', size: 12, line: {width: 2, color:'grey'}}
+  //   marker: {color:'red', size: 12, },
   // },
   hoverinfo: 'none',
 }];
@@ -38,7 +45,14 @@ function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [figure, setFigure] = useState();
   const [revision, setRevision] = useState(0);
+
+  let testX = currentData[0].x[activeIndex];
+  let testY = currentData[0].y[activeIndex];
+
+  const [hoverX, setHoverX] = useState(testX);
+  const [hoverY, setHoverY] = useState(testY);
   const ref = useRef();
+
 
   function handleMouseClick(e) {
     console.log(e);
@@ -47,25 +61,46 @@ function App() {
     const element = document.getElementById(ind);
     // console.log(element);
     element.scrollIntoView({behavior: 'smooth'});
-    setActiveIndex(ind);
-
+  
     console.log(ind);
     console.log(data[ind]);
     console.log(currentData[0].marker.color[ind]);
-    currentData[0].marker.color[ind] = 'green';
-    console.log(currentData[0].marker.color)
-    setData(currentData);
-    setRevision(revision+1);
-    console.log(revision);
+
+    updateData(ind);
+    // let temp = currentData[0].x
+    // currentData[0].x = currentData[0].y
+    // currentData[0].y = temp
+
+    // currentData[0].marker.color[activeIndex] = 'grey';
+    // currentData[0].marker.color[ind] = 'green';
+    // console.log(currentData[0].marker.color)
+    // setActiveIndex(ind);
+    // setData(currentData);
+    // setRevision(revision+1);
+    // console.log(revision);
+
     // const allPoints = Array.from(document.querySelectorAll(".point"));
     // console.log(allPoints);
     // console.log(data[ind])
   }
 
+  function handleMouseOver(e) {
+    let ind = e.points[0].pointIndex;
+    setHoverX(currentData[0].x[ind]);
+    setHoverY(currentData[0].y[ind]);
+  }
+
+  function listHover(e) {
+    setHoverX(currentData[0].x[e]);
+    setHoverY(currentData[0].y[e]);
+  }
+
   function listClick(e) {
     console.log(e);
-    setActiveIndex(e);
     console.log(ref.current);
+
+    setActiveIndex(e);
+    updateData(e);
     // console.log(ind);
     // console.log(data[ind]);
     // console.log(currentData[0].marker.color[ind]);
@@ -73,6 +108,16 @@ function App() {
     // setData(currentData);
     // const allPoints = Array.from(document.querySelectorAll(".point"));
     // console.log(allPoints);
+  }
+
+  function updateData(ind) {
+    currentData[0].marker.color[activeIndex] = 'grey';
+    currentData[0].marker.color[ind] = 'green';
+    console.log(currentData[0].marker.color)
+    setActiveIndex(ind);
+    setData(currentData);
+    setRevision(revision+1);
+    console.log(revision);
   }
 
   return (
@@ -85,8 +130,51 @@ function App() {
             height: 720,
             dragmode : 'pan',
             hovermode: 'closest',
-            xaxis: {range: [-1.1, 1.1], fixedrange: false},
-            yaxis: {range: [-0.1, 1.1], fixedrange:false},
+            xaxis: {
+              title: xAxis,
+              range: [-1.1, 1.1], 
+              fixedrange: false,
+              autotick: false,
+            },
+            yaxis: {
+              title: yAxis,
+              range: [-0.1, 1.1], 
+              fixedrange:false,
+              tick0: 0.5,
+              autotick: false,
+              zeroline: false,
+            },
+            shapes: [
+              {
+                type: 'line',
+                layer: 'below',
+                x0: -2,
+                y0: 0.5,  
+                x1: 2,
+                y1: 0.5,
+                line: {
+                  color: 'rgb(0, 0, 0)',
+                  width: 1
+                }
+              },
+              {
+                type: 'circle',
+                xref: 'x',
+                yref: 'y',
+                xsizemode: 'pixel',
+                ysizemode: 'pixel',
+                xanchor: hoverX,
+                yanchor: hoverY,
+                x0: -8,
+                y0: -8,
+                x1: 8,
+                y1: 8,
+                line: {
+                  color: 'rgba(0, 0, 0, 0.5)',
+                  width: 2,
+                }
+              },
+            ],
             clickmode: 'event',
             uirevision: true,
             datarevision: {revision}
@@ -98,6 +186,7 @@ function App() {
             responsive: true,
           }}
           onClick={handleMouseClick}
+          onHover={handleMouseOver}
         />
       </div>
 
@@ -116,7 +205,7 @@ function App() {
               author={{
                 name: data[activeIndex].DisplayName,
                 username: data[activeIndex].User,
-                image: data[activeIndex].ProfileURL,
+                // image: data[activeIndex].ProfileURL,
                 isVerified: data[activeIndex]['User Info'].protected,
               }}
               tweet={data[activeIndex].Tweet}
@@ -124,14 +213,14 @@ function App() {
               source={data[activeIndex]['User Info'].location}
               permalink={data[activeIndex].URL}
               fitInsideContainer
-              showDetails={true}
+              showDetails={false}
               showEngagement={true}
             />
             <SimpleBar className='tweetlist' scrollableNodeProps={{ ref: ref }}>
               <ListGroup variant="flush">
                 {data.map((post, key) => 
                   // <Post postData={post} key={post.id}/>
-                  <ListGroup.Item action onClick={() => listClick(key)} key={key} id={key}>
+                  <ListGroup.Item action onClick={() => listClick(key)} onMouseOver={() => listHover(key)} key={key} id={key}>
                     <TweetCard
                       theme='light'
                       emojis={false}
