@@ -1,5 +1,4 @@
 # Build step #1: build the React front end
-FROM node:16-alpine as build-step
 WORKDIR /
 ENV PATH /node_modules/.bin:$PATH
 COPY package.json package-lock.json ./
@@ -18,5 +17,5 @@ RUN pip install -r ./api/requirements.txt
 ENV FLASK_ENV production
 
 EXPOSE 3000
-WORKDIR /app/api
+WORKDIR /api
 CMD ["gunicorn", "-b", ":3000", "api:app"]
