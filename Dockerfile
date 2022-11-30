@@ -4,8 +4,8 @@ ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json yarn.lock ./
 COPY ./src ./src
 COPY ./public ./public
-RUN yarn install
-RUN yarn build
+RUN npm install --legacy-peer-deps
+RUN npm build
 
 # Build step #2: build the API with the client as static files
 FROM python:3.9
