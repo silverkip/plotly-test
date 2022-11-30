@@ -5,49 +5,64 @@ import TweetCard from 'react-tweet-card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
+import {fetchData, buildChart} from './FetchData';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-// const data = [
-//   { name:'This is Headline A', polarity: 0.8, subjectivity: 0.9, z: 400 },
-//   { name:'This is Headline B', polarity: 0.7, subjectivity: 0.4, z: 400 },
-//   { name:'This is Headline C', polarity: 0.4, subjectivity: 0.2, z: 400 },
-//   { name:'This is Headline D', polarity: 0.1, subjectivity: 0.7, z: 400 },
-// ];
+const PRIMARY_COLOR = "0060df";
+const SECONDARY_COLOR = "8899a6";
+const ACCENT_COLOR = "green";
 
-const data = require('./data/sample_record.json');
-// const PRIMARY_COLOR = "";
-// const SECONDARY_COLOR = "8899a6";
-// const ACCENT_COLOR = "2AA3EF";
+// let chart = buildChart(data);
 
-let color = new Array(data.length).fill('2AA3EF');
-let xAxis = "Polarity"
-let yAxis = "Subjectivity"
+let RANGE_DICT = {
+  "Polarity":[-1.1, 1.1],
+  "Subjectivity": [-0.1, 1.1],
+  "Followers":[0,0],
+  "Retweets":[0,0],
+  "Likes":[0,0],
+  "Statuses":[0,0]
+}
 
-let chart = [{
-  x: [],
-  y: [],
-  mode: 'markers',
-  type: 'scatter',
-  marker: {color: color, size:12,},
-  // selectedpoints: [1],
-  // selected: {
-  //   marker: {color:'red', size: 12, },
-  // },
-  hoverinfo: 'none',
-}];
-data.forEach(function(val) {
-  chart[0].x.push(val["Polarity"]);
-  chart[0].y.push(val["Subjectivity"]);
-});
+let data = require('./data/sample_record.json');
+let chart = buildChart(data);
+
+// let chart = [{
+//   x: [],
+//   y: [],
+//   mode: 'markers',
+//   type: 'scatter',
+//   marker: {color: color, size:12,},
+//   // selectedpoints: [1],
+//   // selected: {
+//   //   marker: {color:'red', size: 12, },
+//   // },
+//   hoverinfo: 'none',
+// }];
+
+// data.forEach(function(val) {
+//   chart[0].x.push(val["Polarity"]);
+//   chart[0].y.push(val["Subjectivity"]);
+// });
 
 
 function App() {
-  const [currentData, setData] = useState(chart)
+  const [currentData, setData] = useState(data);
+  const [currentChart, setChart] = useState(chart);
   const [activeIndex, setActiveIndex] = useState(0);
   const [figure, setFigure] = useState();
   const [revision, setRevision] = useState(0);
+  const [query, setQuery] = useState();
+  const [xAxis, setXAxis] = useState("Polarity");
+  const [yAxis, setYAxis] = useState("Subjectivity");
+  const [rangeDict, setRange] = useState(RANGE_DICT);
 
-  let testX = currentData[0].x[activeIndex];
-  let testY = currentData[0].y[activeIndex];
+  let testX = currentChart[0].x[activeIndex];
+  let testY = currentChart[0].y[activeIndex];
 
   const [hoverX, setHoverX] = useState(testX);
   const [hoverY, setHoverY] = useState(testY);
@@ -63,10 +78,10 @@ function App() {
     element.scrollIntoView({behavior: 'smooth'});
   
     console.log(ind);
-    console.log(data[ind]);
-    console.log(currentData[0].marker.color[ind]);
+    // console.log(data[ind]);
+    console.log(currentChart[0].marker.color[ind]);
 
-    updateData(ind);
+    updateChart(ind);
     // let temp = currentData[0].x
     // currentData[0].x = currentData[0].y
     // currentData[0].y = temp
@@ -84,23 +99,42 @@ function App() {
     // console.log(data[ind])
   }
 
+  function updateMax(newData) {
+    let statusmax = 0;
+    let followersmax = 0;
+    let likesmax = 0;
+    let rtmax = 0;
+
+    for (var i=0; i<newData.length; i++) {
+      statusmax = newData[i]['Statuses'] > statusmax ? newData[i]['Statuses'] : statusmax;
+      followersmax = newData[i]['Followers'] > followersmax ?  newData[i]['Followers'] : followersmax;
+      likesmax = newData[i]['Likes'] > likesmax ?  newData[i]['Likes'] : likesmax;
+      rtmax = newData[i]['Retweets'] > rtmax ?  newData[i]['Retweets'] : rtmax;
+    };
+    rangeDict['Followers'] = [0, followersmax];
+    rangeDict['Statuses'] = [0, statusmax];
+    rangeDict['Likes'] = [0, likesmax];
+    rangeDict['Retweets'] = [0, rtmax];
+    setRange(rangeDict);
+  }
+
   function handleMouseOver(e) {
     let ind = e.points[0].pointIndex;
-    setHoverX(currentData[0].x[ind]);
-    setHoverY(currentData[0].y[ind]);
+    setHoverX(currentChart[0].x[ind]);
+    setHoverY(currentChart[0].y[ind]);
   }
 
   function listHover(e) {
-    setHoverX(currentData[0].x[e]);
-    setHoverY(currentData[0].y[e]);
+    setHoverX(currentChart[0].x[e]);
+    setHoverY(currentChart[0].y[e]);
   }
 
   function listClick(e) {
-    console.log(e);
-    console.log(ref.current);
+    // console.log(e);
+    // console.log(ref.current);
 
     setActiveIndex(e);
-    updateData(e);
+    updateChart(e);
     // console.log(ind);
     // console.log(data[ind]);
     // console.log(currentData[0].marker.color[ind]);
@@ -110,21 +144,97 @@ function App() {
     // console.log(allPoints);
   }
 
-  function updateData(ind) {
-    currentData[0].marker.color[activeIndex] = 'grey';
-    currentData[0].marker.color[ind] = 'green';
-    console.log(currentData[0].marker.color)
-    setActiveIndex(ind);
-    setData(currentData);
+  function updateData(e) {
+    console.log(e);
+    let search_query = String(e);
+    fetchData(search_query).then(function(data) {
+      setData(data);
+      setChart(buildChart(data));
+      updateMax(data);
+      setActiveIndex(0);
+      setRevision(revision+1);
+    });
+    console.log(RANGE_DICT);
+    console.log(currentData[0]);
+  }
+
+  function changeXAxis(x) {
+    setXAxis(x);
+    setChart(buildChart(currentData, xAxis, yAxis));
+    console.log(xAxis);
+    console.log(currentChart);
+    console.log(currentData);
     setRevision(revision+1);
-    console.log(revision);
+  }
+
+  function changeYAxis(y) {
+    setYAxis(y);
+    setChart(buildChart(currentData, xAxis, yAxis));
+    console.log(yAxis);
+    console.log(currentChart);
+    console.log(currentData);
+    setRevision(revision+1);
+  }
+
+  function updateChart(ind) {
+    currentChart[0].marker.color[activeIndex] = SECONDARY_COLOR;
+    currentChart[0].marker.color[ind] = ACCENT_COLOR;
+    // console.log(currentChart[0].marker.color)
+    setActiveIndex(ind);
+    setChart(currentChart);
+    setRevision(revision+1);
+    // console.log(revision);
   }
 
   return (
     <div className='container'>
-      <div className='column-1 plot'>
+      <div className='column-1'>
+        <InputGroup className="mt-1 mb-0 search-bar">
+          <Form.Control
+            placeholder="Keyword"
+            aria-label="Keyword"
+            aria-describedby="basic-addon1"
+            onChange={event => {
+              setQuery(event.target.value);
+            }} 
+            value={query ? query : ""}
+          />
+          <Button variant="outline-secondary" id="button-addon1" onClick={() => updateData(query)}>
+            Search
+          </Button>
+        </InputGroup>
+
+        <InputGroup className="mb-3">
+          <InputGroup.Text>X-Axis</InputGroup.Text>
+          <Form.Select aria-label="Default select example"
+            onChange={event => {
+              changeXAxis(event.target.value);
+            }}
+          >
+            <option value="Polarity" selected>Polarity</option>
+            <option value="Followers">Followers</option>
+            <option value="Retweets">Retweets</option>
+            <option value="Likes">Likes</option>
+            <option value="Statuses">Total Posts</option>
+            <option value="Subjectivity">Subjectivity</option>
+          </Form.Select>
+          <InputGroup.Text>Y-Axis</InputGroup.Text>
+          <Form.Select aria-label="Default select example"
+            onChange={event => {
+              console.log(event.target.value);
+            }}
+          >
+            <option value="Subjectivity" selected>Subjectivity</option>
+            <option value="Followers">Followers</option>
+            <option value="Retweets">Retweets</option>
+            <option value="Likes">Likes</option>
+            <option value="Statuses">Total Posts</option>
+            <option value="Polarity">Polarity</option>
+          </Form.Select>
+        </InputGroup>
+
         <Plot
-          data = {currentData}
+          data = {currentChart}
           layout = {{
             width: 720,
             height: 720,
@@ -132,16 +242,13 @@ function App() {
             hovermode: 'closest',
             xaxis: {
               title: xAxis,
-              range: [-1.1, 1.1], 
-              fixedrange: false,
+              range: rangeDict[xAxis],
               autotick: false,
               showgrid: false,
             },
             yaxis: {
               title: yAxis,
-              range: [-0.1, 1.1], 
-              fixedrange:false,
-              tick0: 0.5,
+              range: rangeDict[yAxis],
               autotick: false,
               zeroline: false,
               showgrid: false,
@@ -150,9 +257,9 @@ function App() {
               {
                 type: 'line',
                 layer: 'below',
-                x0: -2,
+                x0: -100,
                 y0: 0.5,  
-                x1: 2,
+                x1: 100,
                 y1: 0.5,
                 line: {
                   color: 'rgb(0, 0, 0)',
@@ -167,13 +274,13 @@ function App() {
                 ysizemode: 'pixel',
                 xanchor: hoverX,
                 yanchor: hoverY,
-                x0: -8,
-                y0: -8,
-                x1: 8,
-                y1: 8,
+                x0: -9,
+                y0: -9,
+                x1: 9,
+                y1: 9,
                 line: {
-                  color: 'rgba(0, 0, 0, 0.5)',
-                  width: 2,
+                  color: 'rgba(0, 0, 0, 0.7)',
+                  width: 2.5,
                 }
               },
             ],
@@ -189,6 +296,7 @@ function App() {
           }}
           onClick={handleMouseClick}
           onHover={handleMouseOver}
+          // onUpdate={(figure) => setFigure(figure)}
         />
       </div>
 
@@ -201,26 +309,26 @@ function App() {
               theme='dim'
               emojis={false}
               engagement={{
-                likes: data[activeIndex].Likes,
-                retweets: data[activeIndex].Retweets,
+                likes: currentData[activeIndex].Likes,
+                retweets: currentData[activeIndex].Retweets,
               }}
               author={{
-                name: data[activeIndex].DisplayName,
-                username: data[activeIndex].User,
+                name: currentData[activeIndex].DisplayName,
+                username: currentData[activeIndex].User,
                 // image: data[activeIndex].ProfileURL,
-                isVerified: data[activeIndex]['User Info'].protected,
+                isVerified: currentData[activeIndex]['User Info'].protected,
               }}
-              tweet={data[activeIndex].Tweet}
-              time={new Date(data[activeIndex]['Date Created'])}
-              source={data[activeIndex]['User Info'].location}
-              permalink={data[activeIndex].URL}
+              tweet={currentData[activeIndex].Tweet}
+              time={new Date(currentData[activeIndex]['Date Created'])}
+              source={currentData[activeIndex]['User Info'].location}
+              permalink={currentData[activeIndex].URL}
               fitInsideContainer
               showDetails={false}
               showEngagement={true}
             />
             <SimpleBar className='tweetlist' scrollableNodeProps={{ ref: ref }}>
               <ListGroup variant="flush">
-                {data.map((post, key) => 
+                {currentData.map((post, key) => 
                   // <Post postData={post} key={post.id}/>
                   <ListGroup.Item action onClick={() => listClick(key)} onMouseOver={() => listHover(key)} key={key} id={key}>
                     <TweetCard
@@ -233,8 +341,8 @@ function App() {
                       author={{
                         name: post.DisplayName,
                         username: post.User,
-                        image: post.ProfileURL,
-                        isVerified: post['User Info'].protected,
+                        // image: post.ProfileURL,
+                        isVerified: post['User Info'].verified,
                       }}
                       tweet={post.Tweet}
                       time={new Date(post['Date Created'])}

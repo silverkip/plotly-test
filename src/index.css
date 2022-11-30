@@ -114,6 +114,10 @@ code {
   cursor: pointer;
 }
 
+.search-bar {
+  padding: 5px 5px 0px 0px;
+}
+
 /* .list-group{
   margin-top: 2rem;
   max-height: 40vh;
