@@ -66,7 +66,6 @@ shellingham==1.5.0
 six==1.16.0
 snscrape==0.1.dev25+g31a674d
 soupsieve==2.3.2.post1
-src @ file:///D:/INIAD/Research/Sample/plotly-test/api/src
 textblob==0.17.1
 toml==0.10.2
 tomlkit==0.11.6
