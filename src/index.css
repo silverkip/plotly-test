@@ -5,9 +5,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  display: flex;
-  min-height: 100vh;
-  flex-direction: row;
+}
+
+#root {
+  width: 100%;
 }
 
 
@@ -16,12 +17,8 @@ code {
     monospace;
 }
 
-.container {
-  display: flex;
-  min-height: 100%;
-}
 
-.column-1 {
+/* .column-1 {
   display:flex;
   flex-direction: column;
   flex: 3;
@@ -38,16 +35,11 @@ code {
   width: 100%;
 }
 
-.tweetlist {
-  flex: 4;
-  margin-top: 0.5rem;
-  max-height: 43vh;
-}
 
 .tweetviewer {
   margin-top: 0.5rem;
   max-height:55vh;
-}
+} */
 
 /* .tweetviewer .react-tweet-card__author-name {
   font-size: 1rem !important;
@@ -58,7 +50,7 @@ code {
 }
 */
 
-.tweetviewer .react-tweet-card__tweet {
+/* .tweetviewer .react-tweet-card__tweet {
   font-size: 80%;
 }
 
@@ -69,6 +61,7 @@ code {
 .tweetviewer .react-tweet-card__source {
   font-size: 70%;
 }
+*/
 
 .tweetviewer .react-tweet-card__engagement-container {
   font-size: 0.8em;
@@ -97,11 +90,11 @@ code {
 
 .tweetlist .react-tweet-card__container {
   padding: 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0rem;
   margin: 0;
   row-gap: 0.5rem;
   width: 100%;
-  font-size: 0px !important;
+  font-size: 0.7rem !important;
 }
 
 .tweetlist button {
@@ -125,3 +118,7 @@ code {
   -webkit-overflow-scrolling: touch;
 } */
 
+
+.tweetlist {
+  max-height: 100vh;
+}
